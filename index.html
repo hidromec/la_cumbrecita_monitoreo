@@ -1,545 +1,416 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=1400,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>SCADA · Red de Agua · La Cumbrecita</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet"/>
-<style>
-:root{
-  --bg:#070c10;--panel:#0c1219;--panel2:#101820;
-  --border:#182430;--border2:#1e3040;
-  --blue:#00b4ff;--teal:#00e5c8;--green:#00e676;
-  --red:#ff3b3b;--gray:#546878;--yellow:#ffc400;
-  --txt-hi:#ddeeff;--txt-md:#6a90aa;--txt-lo:#2d4a5a;
-  --pipe-off:#112030;
-  --fmono:'Share Tech Mono',monospace;
-  --ftitle:'Rajdhani',sans-serif;
-  --fbody:'Exo 2',sans-serif;
-}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SCADA · Red de Agua · La Cumbrecita</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@400;600&display=swap" rel="stylesheet" />
+    
+    <style>
+        /* ==========================================================================
+           VARIABLES Y ESTILOS BASE (Mantenendo tu paleta oscura)
+           ========================================================================== */
+        :root {
+            --bg: #070c10;
+            --panel: #0c1219;
+            --panel2: #101820;
+            --border: #182430;
+            --border2: #1e3040;
+            --blue: #00b4ff;
+            --teal: #00e5c8;
+            --green: #00e676;
+            --red: #ff3b30;
+            --gray: #546878;
+            --yellow: #ffc400;
+            --txt-hi: #ddeeff;
+            --txt-md: #6a90aa;
+            --txt-lo: #2d4a5a;
+        }
 
-*{ box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  background-color: var(--bg);
-  color: var(--txt-hi);
-  font-family: var(--fbody);
-  padding: 20px;
-  overflow-x: auto;
-}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Exo 2', sans-serif;
+        }
 
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  padding: 15px 25px;
-  border-radius: 6px;
-  margin-bottom: 20px;
-}
-header h1 { font-family: var(--ftitle); font-size: 24px; color: var(--blue); letter-spacing: 1px; }
+        body {
+            background-color: var(--bg);
+            color: var(--txt-hi);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-/* Sistema de Navegación por Pestañas */
-.nav-tabs {
-  display: flex;
-  gap: 10px;
-}
-.tab-btn {
-  background: var(--panel2);
-  border: 1px solid var(--border);
-  color: var(--txt-md);
-  padding: 10px 20px;
-  cursor: pointer;
-  font-family: var(--ftitle);
-  font-weight: 600;
-  font-size: 16px;
-  border-radius: 4px;
-  transition: all 0.3s;
-}
-.tab-btn:hover, .tab-btn.active {
-  border-color: var(--blue);
-  color: var(--blue);
-  background: #00b4ff10;
-}
+        header {
+            background-color: var(--panel);
+            text-align: center;
+            padding: 20px;
+            border-bottom: 2px solid var(--border);
+        }
 
-.page-content { display: none; }
-.page-content.active { display: block; }
+        header h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--blue);
+            letter-spacing: 1px;
+        }
 
-/* Dashboard Grid */
-.grid-general {
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 20px;
-}
+        header p {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--txt-md);
+            margin-top: 5px;
+        }
 
-.card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 20px;
-  margin-bottom: 20px;
-}
-.card h2 {
-  font-family: var(--ftitle);
-  font-size: 18px;
-  color: var(--txt-md);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 10px;
-  margin-bottom: 15px;
-  text-transform: uppercase;
-}
+        footer {
+            background-color: var(--panel);
+            text-align: center;
+            padding: 15px;
+            margin-top: auto;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--txt-md);
+            border-top: 1px solid var(--border);
+        }
 
-/* Diagrama Unificado SCADA */
-.scada-layout {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  background: #09111a;
-  height: 400px;
-  border-radius: 6px;
-  padding: 40px;
-  position: relative;
-  border: 1px dashed var(--border2);
-}
+        #cpu-temp {
+            font-weight: bold;
+            color: var(--teal);
+        }
 
-.node-tank {
-  width: 180px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-}
-.tank-visual {
-  width: 100%;
-  height: 180px;
-  border: 3px solid var(--border2);
-  background: #050a0f;
-  position: relative;
-  border-radius: 0 0 8px 8px;
-  display: flex;
-  align-items: flex-end;
-  overflow: hidden;
-}
-.water-level {
-  width: 100%;
-  height: 20%; /* Dinámico */
-  background: linear-gradient(180deg, #00b4ff60 0%, #0055ff80 100%);
-  transition: height 0.5s ease, background 0.3s;
-}
-.node-tank.low-level .water-level {
-  background: linear-gradient(180deg, #ff3b3b60 0%, #aa111180 100%);
-}
+        /* ==========================================================================
+           CONTENEDOR SCADA Y TOPOGRAFÍA (PC / PANTALLAS GRANDES)
+           ========================================================================== */
+        .scada-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: flex-end; /* Simula la pendiente del terreno real */
+            gap: 25px;
+            padding: 50px 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
 
-.tank-label { font-family: var(--ftitle); font-weight: 600; margin-top: 10px; color: var(--txt-md); }
-.status-indicator {
-  font-family: var(--fmono);
-  font-size: 12px;
-  padding: 3px 8px;
-  border-radius: 3px;
-  margin-top: 5px;
-  background: var(--pipe-off);
-}
-.status-indicator.ok { color: var(--green); background: #00e67615; }
-.status-indicator.fail { color: var(--red); background: #ff3b3b15; }
+        .nodo-terreno {
+            background-color: var(--panel);
+            border-radius: 12px;
+            padding: 20px;
+            width: 330px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid var(--border);
+        }
 
-/* Estilo de Bombas dentro del Diagrama */
-.pump-visual {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  border: 3px solid var(--gray);
-  background: var(--panel2);
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--ftitle);
-  font-weight: bold;
-  font-size: 14px;
-  color: var(--gray);
-  z-index: 10;
-  transition: all 0.3s;
-}
-.pump-visual.running {
-  border-color: var(--green);
-  color: var(--green);
-  box-shadow: 0 0 15px rgba(0, 230, 118, 0.3);
-}
-.pump-visual.error {
-  border-color: var(--red);
-  color: var(--red);
-}
+        .nodo-terreno h2 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--txt-hi);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-/* Posiciones de bombas en diagrama */
-.pump-b1 { bottom: 20px; right: -25px; } /* Sumergible Río */
-.pump-b2 { bottom: 15px; left: calc(50% - 25px); transform: rotate(-90deg); } /* Acostada en Pileta */
+        /* Escalonamiento topográfico de La Cumbrecita */
+        .rio-bloque { order: 3; }
+        .pileta-bloque { order: 2; margin-bottom: 90px; }  /* Altura media */
+        .cisterna-bloque { order: 1; margin-bottom: 180px; } /* Altura máxima */
 
-/* Tuberías de Interconexión */
-.pipe-line {
-  position: absolute;
-  background: var(--pipe-off);
-  z-index: 1;
-  transition: background 0.3s;
-}
-.pipe-line.active { background: var(--blue); box-shadow: 0 0 8px var(--blue); }
+        /* ==========================================================================
+           RECIPIENTES DE AGUA Y ANIMACIÓN DE ONDAS (WAVES)
+           ========================================================================== */
+        .recipiente {
+            width: 170px;
+            height: 190px;
+            border: 4px solid var(--border2);
+            border-top: none;
+            border-radius: 0 0 16px 16px;
+            position: relative;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.4);
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.8);
+        }
 
-.pipe1 { height: 4px; width: 230px; bottom: 60px; left: 210px; }
-.pipe2 { height: 180px; width: 4px; bottom: 60px; left: 440px; }
-.pipe3 { height: 4px; width: 220px; bottom: 240px; left: 440px; }
-.pipe4 { height: 60px; width: 4px; bottom: 180px; right: 210px; }
+        .rio-recipiente {
+            border-radius: 24px;
+            border: 4px solid var(--border2);
+            height: 120px;
+            width: 210px;
+        }
 
-/* Tablas de Datos Técnicos y Parámetros */
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: var(--fbody);
-}
-.data-table th {
-  text-align: left;
-  padding: 8px;
-  color: var(--txt-lo);
-  font-family: var(--ftitle);
-  font-size: 13px;
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--border);
-}
-.data-table td {
-  padding: 10px 8px;
-  border-bottom: 1px solid #101a24;
-}
-.data-table tr:last-child td { border: none; }
+        .agua {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background-color: var(--blue);
+            transition: height 0.8s ease, background-color 0.5s ease;
+        }
 
-.val-mono { font-family: var(--fmono); font-size: 16px; color: var(--blue); }
-.unit { font-size: 12px; color: var(--txt-md); margin-left: 4px; }
+        /* Generador de olas */
+        .wave {
+            position: absolute;
+            top: -12px;
+            width: 200%;
+            height: 24px;
+            background: radial-gradient(circle at 50% 100%, transparent 12px, var(--blue) 13px);
+            background-size: 24px 24px;
+            animation: oleajeContinuo 1.6s infinite linear;
+        }
 
-.grid-expanded {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-  gap: 20px;
-}
+        @keyframes oleajeContinuo {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-24px); }
+        }
 
-.system-status {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.status-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px dashed var(--border);
-}
+        /* ESTADO ALERTA ROJA: Cuando el interruptor de nivel pasa a 0 (Nivel Bajo) */
+        .recipiente.nivel-bajo .agua {
+            background-color: var(--red) !important;
+        }
+        .recipiente.nivel-bajo .wave {
+            background: radial-gradient(circle at 50% 100%, transparent 12px, var(--red) 13px) !important;
+            background-size: 24px 24px !important;
+        }
 
-</style>
+        .indicador-nivel {
+            margin-top: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.95rem;
+            color: var(--teal);
+        }
+        
+        .recipiente.nivel-bajo + .indicador-nivel {
+            color: var(--red);
+            font-weight: bold;
+            animation: parpadeoAlerta 1s infinite alternate;
+        }
+
+        @keyframes parpadeoAlerta {
+            0% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        /* ==========================================================================
+           TARJETAS DE BOMBAS Y LÓGICA DE COLORES DE ESTADO
+           ========================================================================== */
+        .bomba-card {
+            margin-top: 20px;
+            background-color: var(--panel2);
+            border-radius: 8px;
+            padding: 15px;
+            width: 100%;
+            border: 1px solid var(--border);
+        }
+
+        .bomba-motor {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #fff;
+            float: left;
+            margin-right: 14px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        .bomba-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bomba-titulo {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--txt-hi);
+        }
+
+        .bomba-estado {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            margin-top: 2px;
+        }
+
+        .bomba-modo {
+            font-size: 0.8rem;
+            font-style: italic;
+            color: var(--txt-md);
+            margin-top: 1px;
+        }
+
+        /* Clases de estado dinámicas según tus especificaciones */
+        .bomba-marcha { background-color: var(--green); }          /* Verde */
+        .bomba-falla { background-color: var(--red); }             /* Rojo */
+        .bomba-deshabilitada { background-color: var(--yellow); }  /* Amarillo/Naranja */
+        .bomba-espera { background-color: var(--gray); }           /* Gris */
+
+        /* ==========================================================================
+           TELEMETRÍA ELÉCTRICA (SIEMPRE VISIBLE)
+           ========================================================================== */
+        .datos-electricos {
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--border);
+            clear: both;
+            width: 100%;
+        }
+
+        .datos-electricos h4 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--blue);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .datos-electricos ul {
+            list-style: none;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        .datos-electricos li {
+            padding: 3px 0;
+            display: flex;
+            justify-content: space-between;
+            color: var(--txt-md);
+        }
+
+        .datos-electricos span {
+            font-weight: bold;
+            color: var(--txt-hi);
+        }
+
+        .nota-sistema {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: var(--txt-md);
+            text-align: center;
+        }
+
+        /* ==========================================================================
+           RESPONSIVO: DISPOSITIVOS MÓVILES (FORMATO VERTICAL COMPLETO)
+           ========================================================================== */
+        @media (max-width: 768px) {
+            .scada-container {
+                flex-direction: column; /* Pasa todo el layout a una sola columna vertical */
+                align-items: center;
+                padding: 20px 15px;
+                gap: 25px;
+            }
+
+            .nodo-terreno {
+                width: 100%; /* Toma el ancho completo de la pantalla del celular */
+                max-width: 380px;
+                margin-bottom: 0px !important; /* Quita los desniveles para que no queden huecos en blanco */
+            }
+
+            /* Reordena la secuencia de arriba hacia abajo para formato vertical */
+            .cisterna-bloque { order: 1; }
+            .pileta-bloque { order: 2; }
+            .rio-bloque { order: 3; }
+
+            .datos-electricos {
+                display: block !important; /* Detalles de B1 y B2 siempre visibles en el Inicio */
+            }
+        }
+    </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <h1>COOP. LA CUMBRECITA</h1>
-    <p style="color: var(--txt-md); font-size:13px;">SCADA de Monitoreo · Sistema de Bombeo de Agua</p>
-  </div>
-  <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchPage('general')">VISTA GENERAL</button>
-    <button class="tab-btn" onclick="switchPage('b1-rio')">DETALLE B1 - RÍO</button>
-    <button class="tab-btn" onclick="switchPage('b2-pileta')">DETALLE B2 - PILETA</button>
-  </div>
-</header>
+    <header>
+        <h1>PANEL SCADA · SISTEMA DE BOMBEO</h1>
+        <p>Cooperativa de Agua - La Cumbrecita, Córdoba</p>
+    </header>
 
-<div id="page-general" class="page-content active">
-  <div class="grid-general">
-    
-    <div class="card">
-      <h2>Mímico de Proceso Automático</h2>
-      
-      <div class="scada-layout">
-        <div id="p-line1" class="pipe-line pipe1"></div>
-        <div id="p-line2" class="pipe-line pipe2"></div>
-        <div id="p-line3" class="pipe-line pipe3"></div>
-        <div id="p-line4" class="pipe-line pipe4"></div>
+    <main class="scada-container">
 
-        <div id="tank-n1" class="node-tank">
-          <div class="tank-visual">
-            <div id="lvl-water-n1" class="water-level"></div>
-            <div id="p-visual-b1" class="pump-visual pump-b1">B1</div>
-          </div>
-          <div class="tank-label">RÍO (Captación)</div>
-          <div id="lbl-n1" class="status-indicator">ESPERANDO DATA</div>
-        </div>
+        <section class="nodo-terreno cisterna-bloque">
+            <h2>1. Cisterna (Tanque Elevado)</h2>
+            <div class="recipiente" id="tanque-cisterna">
+                <div class="agua" id="agua-cisterna" style="height: 70%;">
+                    <div class="wave"></div>
+                </div>
+            </div>
+            <div class="indicador-nivel" id="txt-nivel-cisterna">NIVEL: CORRECTO</div>
+            
+            <div class="bomba-card">
+                <div class="bomba-motor bomba-espera" id="motor-b1">B1</div>
+                <div class="bomba-info">
+                    <span class="bomba-titulo">Bomba 1</span>
+                    <span class="bomba-estado" id="estado-b1" style="color: var(--gray);">Estado: EN ESPERA</span>
+                    <span class="bomba-modo" id="modo-b1">Modo: AUTOMÁTICO</span>
+                </div>
+                
+                <div class="datos-electricos">
+                    <h4>Telemetría Eléctrica:</h4>
+                    <ul>
+                        <li>Tensión L1: <span id="b1-v1">--</span> V</li>
+                        <li>Tensión L2: <span id="b1-v2">--</span> V</li>
+                        <li>Tensión L3: <span id="b1-v3">--</span> V</li>
+                        <li>Tiempo de Marcha: <span id="b1-horas">--</span> hs</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
 
-        <div id="tank-n2" class="node-tank">
-          <div class="tank-visual">
-            <div id="lvl-water-n2" class="water-level"></div>
-            <div id="p-visual-b2" class="pump-visual pump-b2">B2</div>
-          </div>
-          <div class="tank-label">PILETA INTERMEDIA</div>
-          <div id="lbl-n2" class="status-indicator">ESPERANDO DATA</div>
-        </div>
+        <section class="nodo-terreno pileta-bloque">
+            <h2>2. Pileta de Decantación</h2>
+            <div class="recipiente" id="tanque-pileta">
+                <div class="agua" id="agua-pileta" style="height: 55%;">
+                    <div class="wave"></div>
+                </div>
+            </div>
+            <div class="indicador-nivel" id="txt-nivel-pileta">NIVEL: CORRECTO</div>
 
-        <div id="tank-n3" class="node-tank">
-          <div class="tank-visual">
-            <div id="lvl-water-n3" class="water-level"></div>
-          </div>
-          <div class="tank-label">CISTERNA SUPERIOR</div>
-          <div id="lbl-n3" class="status-indicator">ESPERANDO DATA</div>
-        </div>
-      </div>
-    </div>
+            <div class="bomba-card">
+                <div class="bomba-motor bomba-marcha" id="motor-b2">B2</div>
+                <div class="bomba-info">
+                    <span class="bomba-titulo">Bomba 2</span>
+                    <span class="bomba-estado" id="estado-b2" style="color: var(--green);">Estado: MARCHA</span>
+                    <span class="bomba-modo" id="modo-b2">Modo: AUTOMÁTICO</span>
+                </div>
+                
+                <div class="datos-electricos">
+                    <h4>Telemetría Eléctrica:</h4>
+                    <ul>
+                        <li>Tensión L1: <span id="b2-v1">--</span> V</li>
+                        <li>Tensión L2: <span id="b2-v2">--</span> V</li>
+                        <li>Tensión L3: <span id="b2-v3">--</span> V</li>
+                        <li>Tiempo de Marcha: <span id="b2-horas">--</span> hs</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
 
-    <div>
-      <div class="card">
-        <h2>Estados Operativos</h2>
-        <div class="system-status">
-          <div class="status-row">
-            <span>B1 Río (Modo):</span>
-            <span id="b1-modo" class="val-mono">-</span>
-          </div>
-          <div class="status-row">
-            <span>B1 Estado:</span>
-            <span id="b1-marcha" class="val-mono">-</span>
-          </div>
-          <div class="status-row">
-            <span>B2 Pileta (Modo):</span>
-            <span id="b2-modo" class="val-mono">-</span>
-          </div>
-          <div class="status-row">
-            <span>B2 Estado:</span>
-            <span id="b2-marcha" class="val-mono">-</span>
-          </div>
-        </div>
-      </div>
+        <section class="nodo-terreno rio-bloque">
+            <h2>3. Toma del Río</h2>
+            <div class="recipiente rio-recipiente" id="tanque-rio">
+                <div class="agua" id="agua-rio" style="height: 45%;">
+                    <div class="wave"></div>
+                </div>
+            </div>
+            <div class="indicador-nivel" id="txt-nivel-rio">NIVEL: CORRECTO</div>
+            <p class="nota-sistema">Captación inicial por gravedad.</p>
+        </section>
 
-      <div class="card">
-        <h2>Gateway & Telemetría</h2>
-        <div class="system-status">
-          <div class="status-row">
-            <span>CPU Temp RPi4:</span>
-            <span class="val-mono"><span id="temp-rpi">0.0</span><span class="unit">°C</span></span>
-          </div>
-          <div class="status-row">
-            <span>Refresco SCADA:</span>
-            <span class="val-mono" style="color:var(--gray);">Cada 15s</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    </main>
 
-  </div>
-</div>
+    <footer>
+        <p>Temperatura CPU Servidor: <span id="cpu-temp">--</span> °C | SCADA Sistema Activo</p>
+    </footer>
 
-<div id="page-b1-rio" class="page-content">
-  <div class="grid-expanded">
-    
-    <div class="card">
-      <h2>Variables Eléctricas (WEG SSW-07 ID:01)</h2>
-      <table class="data-table">
-        <thead>
-          <tr><th>Parámetro</th><th>Modbus Reg</th><th>Valor Actual</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Corriente L1</td><td>P030</td><td><span id="b1-il1" class="val-mono">-</span><span class="unit">A</span></td></tr>
-          <tr><td>Corriente L2</td><td>P031</td><td><span id="b1-il2" class="val-mono">-</span><span class="unit">A</span></td></tr>
-          <tr><td>Corriente L3</td><td>P032</td><td><span id="b1-il3" class="val-mono">-</span><span class="unit">A</span></td></tr>
-          <tr><td style="font-weight: 600; color:var(--txt-hi);">Corriente Promedio</td><td>P003</td><td><span id="b1-iprom" class="val-mono" style="color:var(--teal);">-</span><span class="unit">A</span></td></tr>
-          <tr><td>Estado del Arranque Suave</td><td>P006</td><td><span id="b1-est-ssw" class="val-mono">-</span></td></tr>
-          <tr><td>Temperatura Disipador SSW</td><td>P081</td><td><span id="b1-temp-dis" class="val-mono">-</span><span class="unit">°C</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="card">
-      <h2>Gestión y Diagnóstico B1</h2>
-      <table class="data-table">
-        <thead>
-          <tr><th>Historial / Seguridad</th><th>Identificador</th><th>Valor</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Horas de Funcionamiento</td><td>HS_FUNC_B1_RIO</td><td><span id="b1-hs" class="val-mono">-</span><span class="unit">Hs</span></td></tr>
-          <tr><td>Código Falla Actual</td><td>P020</td><td style="color:var(--red);" id="b1-falla-act">-</td></tr>
-          <tr><td>Código Falla Anterior</td><td>P014</td><td style="color:var(--yellow);" id="b1-falla-ant">-</td></tr>
-          <tr><td>Falla Física Digital</td><td>DI_6</td><td><span id="b1-falla-di" class="val-mono">-</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-</div>
-
-<div id="page-b2-pileta" class="page-content">
-  <div class="grid-expanded">
-    
-    <div class="card">
-      <h2>Analizador Eléctrico (RS485 ID:02)</h2>
-      <table class="data-table">
-        <thead>
-          <tr><th>Parámetro Red Eléctrica</th><th>Dirección Modbus</th><th>Lectura Real</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Corriente Línea L1</td><td>0058 (Hex 0x3A)</td><td><span id="b2-il1" class="val-mono">-</span><span class="unit">A</span></td></tr>
-          <tr><td>Corriente Línea L2</td><td>005A (Hex 0x3C)</td><td><span id="b2-il2" class="val-mono">-</span><span class="unit">A</span></td></tr>
-          <tr><td>Corriente Línea L3</td><td>005C (Hex 0x3E)</td><td><span id="b2-il3" class="val-mono">-</span><span class="unit">A</span></td></tr>
-          <tr><td style="font-weight: 600; color:var(--txt-hi);">Corriente Promedio Calculada</td><td>005E (Hex 0x40)</td><td><span id="b2-iprom" class="val-mono" style="color:var(--teal);">-</span><span class="unit">A</span></td></tr>
-          <tr><td>Tensión de Fase A (32bit)</td><td>0066 (Hex 0x42)</td><td><span id="b2-tension" class="val-mono">-</span><span class="unit">V</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="card">
-      <h2>Controladores Operacionales B2</h2>
-      <table class="data-table">
-        <thead>
-          <tr><th>Historial / Entradas Digitales</th><th>Origen Tag</th><th>Indicativo</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Horas de Marcha Acumuladas</td><td>HS_FUNC_B2_PILETA</td><td><span id="b2-hs" class="val-mono">-</span><span class="unit">Hs</span></td></tr>
-          <tr><td>Maniobra Contactor (Marcha)</td><td>DI_5</td><td><span id="b2-di-marcha" class="val-mono">-</span></td></tr>
-          <tr><td>Relevo Térmico / Falla</td><td>DI_6</td><td><span id="b2-di-falla" class="val-mono">-</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-</div>
-
-<script>
-// Reemplazar con la URL real de tu Cloudflare Worker
-const WORKER_URL = 'https://tu-worker.tu-usuario.workers.dev'; 
-
-function switchPage(pageId) {
-  // Manejo de visibilidad de pantallas de pestañas
-  document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  
-  document.getElementById('page-' + pageId).classList.add('active');
-  // Buscar el botón correcto por el evento onclick string
-  event.currentTarget.classList.add('active');
-}
-
-function processSCADALogic(data) {
-  // 1. PROCESAMIENTO DE SENSORES DE NIVEL (DATOS DIGITALES)
-  // N1: Nivel de Río (DI_1)
-  const n1_alto = data.NIVEL_RIO === 1 || data.NIVEL_RIO === true;
-  document.getElementById('lvl-water-n1').style.height = n1_alto ? "85%" : "15%";
-  const lblN1 = document.getElementById('lbl-n1');
-  if(n1_alto){
-    lblN1.textContent = "NIVEL OK"; lblN1.className = "status-indicator ok";
-    document.getElementById('tank-n1').classList.remove('low-level');
-  } else {
-    lblN1.textContent = "CRÍTICO BAJO"; lblN1.className = "status-indicator fail";
-    document.getElementById('tank-n1').classList.add('low-level');
-  }
-
-  // N2: Nivel de Pileta (DI_2)
-  const n2_alto = data.NIVEL_PILETA === 1 || data.NIVEL_PILETA === true;
-  document.getElementById('lvl-water-n2').style.height = n2_alto ? "80%" : "20%";
-  const lblN2 = document.getElementById('lbl-n2');
-  if(n2_alto){
-    lblN2.textContent = "NIVEL LLENO"; lblN2.className = "status-indicator ok";
-    document.getElementById('tank-n2').classList.remove('low-level');
-  } else {
-    lblN2.textContent = "NIVEL VACÍO"; lblN2.className = "status-indicator fail";
-    document.getElementById('tank-n2').classList.add('low-level');
-  }
-
-  // N3: Nivel de Cisterna Superior (DI_3)
-  const n3_alto = data.NIVEL_CISTERNA === 1 || data.NIVEL_CISTERNA === true;
-  document.getElementById('lvl-water-n3').style.height = n3_alto ? "90%" : "25%";
-  const lblN3 = document.getElementById('lbl-n3');
-  if(n3_alto){
-    lblN3.textContent = "ALMACENADO OK"; lblN3.className = "status-indicator ok";
-    document.getElementById('tank-n3').classList.remove('low-level');
-  } else {
-    lblN3.textContent = "RESERVA BAJA"; lblN3.className = "status-indicator fail";
-    document.getElementById('tank-n3').classList.add('low-level');
-  }
-
-  // 2. ESTADOS DINÁMICOS DE BOMBAS Y PIPELINES
-  // Bomba 1 (Río)
-  const b1_corriendo = data.B1_MARCHA === 1 || data.B1_MARCHA === true;
-  const b1_error = data.B1_FALLA === 1 || data.B1_FALLA === true;
-  const pB1 = document.getElementById('p-visual-b1');
-  
-  if(b1_corriendo) {
-    pB1.className = "pump-visual pump-b1 running";
-    document.getElementById('p-line1').classList.add('active');
-  } else if(b1_error) {
-    pB1.className = "pump-visual pump-b1 error";
-    document.getElementById('p-line1').classList.remove('active');
-  } else {
-    pB1.className = "pump-visual pump-b1";
-    document.getElementById('p-line1').classList.remove('active');
-  }
-
-  // Bomba 2 (Pileta Intermedia)
-  const b2_corriendo = data.DI_5 === 1 || data.DI_5 === true; // DI_5: Marcha según tabla
-  const b2_error = data.DI_6 === 1 || data.DI_6 === true;   // DI_6: Falla según tabla
-  const pB2 = document.getElementById('p-visual-b2');
-
-  if(b2_corriendo) {
-    pB2.className = "pump-visual pump-b2 running";
-    document.getElementById('p-line2').classList.add('active');
-    document.getElementById('p-line3').classList.add('active');
-    document.getElementById('p-line4').classList.add('active');
-  } else {
-    pB2.className = b2_error ? "pump-visual pump-b2 error" : "pump-visual pump-b2";
-    document.getElementById('p-line2').classList.remove('active');
-    document.getElementById('p-line3').classList.remove('active');
-    document.getElementById('p-line4').classList.remove('active');
-  }
-
-  // 3. INYECCIÓN DE TEXTOS Y VALORES EN TABLAS (B1)
-  document.getElementById('b1-modo').textContent = data.B1_AUTO ? "AUTOMÁTICO" : "DESHABILITADO / MANUAL";
-  document.getElementById('b1-marcha').textContent = b1_corriendo ? "EN MARCHA" : "DETENIDA";
-  document.getElementById('b1-il1').textContent = data.B1_P030 ?? "0.0";
-  document.getElementById('b1-il2').textContent = data.B1_P031 ?? "0.0";
-  document.getElementById('b1-il3').textContent = data.B1_P032 ?? "0.0";
-  document.getElementById('b1-iprom').textContent = data.B1_P003 ?? "0.0";
-  document.getElementById('b1-est-ssw').textContent = data.B1_P006 ?? "Reposo";
-  document.getElementById('b1-temp-dis').textContent = data.B1_P081 ?? "0.0";
-  document.getElementById('b1-hs').textContent = data.HS_FUNC_B1_RIO ?? "0";
-  document.getElementById('b1-falla-act').textContent = data.B1_P020 ?? "Ninguna (0)";
-  document.getElementById('b1-falla-ant').textContent = data.B1_P014 ?? "0";
-  document.getElementById('b1-falla-di').textContent = b1_error ? "FALLA ACTIVA" : "SIN FALLA";
-
-  // 4. INYECCIÓN DE TEXTOS Y VALORES EN TABLAS (B2)
-  document.getElementById('b2-modo').textContent = data.DI_4 ? "AUTOMÁTICO" : "MANUAL / CORTE";
-  document.getElementById('b2-marcha').textContent = b2_corriendo ? "EN MARCHA" : "DETENIDA";
-  document.getElementById('b2-il1').textContent = data.B2_0058 ?? "0.0";
-  document.getElementById('b2-il2').textContent = data.B2_005A ?? "0.0";
-  document.getElementById('b2-il3').textContent = data.B2_005C ?? "0.0";
-  document.getElementById('b2-iprom').textContent = data.B2_005E ?? "0.0";
-  document.getElementById('b2-di-marcha').textContent = b2_corriendo ? "Contacto Cerrado" : "Abierto";
-  document.getElementById('b2-di-falla').textContent = b2_error ? "TÉRMICO DISPARADO" : "Normal";
-  
-  // Procesamiento de Tensión si envías el valor escalado desde Influx/Worker
-  if(data.B2_TENSION_A) {
-    document.getElementById('b2-tension').textContent = parseFloat(data.B2_TENSION_A).toFixed(2);
-  }
-
-  // Monitor Térmico RPi4 (Prometheus)
-  if(data.rpi_temp) document.getElementById('temp-rpi').textContent = data.rpi_temp;
-}
-
-async function fetchData() {
-  try {
-    const res = await fetch(WORKER_URL);
-    if (!res.ok) throw new Error(res.status);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    
-    // Inyectar toda la telemetría procesada
-    processSCADALogic(data);
-    
-  } catch(e) {
-    console.warn('Error de comunicación con Worker:', e.message);
-    // Marcador visual de fallo de enlace
-    document.getElementById('temp-rpi').textContent = 'ERR';
-  }
-}
-
-// Inicializaciones
-fetchData();
-setInterval(fetchData, 15000); // Polling automático cada 15 segundos
-</script>
 </body>
 </html>
