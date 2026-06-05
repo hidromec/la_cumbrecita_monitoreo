@@ -3,413 +3,473 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>SCADA · Red de Agua · La Cumbrecita</title>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@400;600&display=swap" rel="stylesheet" />
+    <title>SCADA · Planta de Bombeo · La Cumbrecita</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Rajdhani:wght@500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" />
     
     <style>
         /* ==========================================================================
-           VARIABLES Y ESTILOS BASE (Mantenendo tu paleta oscura)
+           PALETA DE COLORES CYBER-INDUSTRIAL (Premium Dark)
            ========================================================================== */
         :root {
-            --bg: #070c10;
-            --panel: #0c1219;
-            --panel2: #101820;
-            --border: #182430;
-            --border2: #1e3040;
-            --blue: #00b4ff;
-            --teal: #00e5c8;
-            --green: #00e676;
-            --red: #ff3b30;
-            --gray: #546878;
-            --yellow: #ffc400;
-            --txt-hi: #ddeeff;
-            --txt-md: #6a90aa;
-            --txt-lo: #2d4a5a;
+            --bg-main: #0a0f14;
+            --bg-card: #111822;
+            --border-glow: #1f2d3d;
+            
+            /* Estados de Iluminación HMI */
+            --cyan-glow: #00f0ff;
+            --green-glow: #00ff66;
+            --red-glow: #ff3344;
+            --yellow-glow: #ffb300;
+            --gray-glow: #475569;
+            
+            /* Textos */
+            --text-primary: #ffffff;
+            --text-secondary: #8fa0b5;
+            --text-dark: #4b5563;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Exo 2', sans-serif;
         }
 
         body {
-            background-color: var(--bg);
-            color: var(--txt-hi);
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
-        }
-
-        header {
-            background-color: var(--panel);
-            text-align: center;
-            padding: 20px;
-            border-bottom: 2px solid var(--border);
-        }
-
-        header h1 {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--blue);
-            letter-spacing: 1px;
-        }
-
-        header p {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.9rem;
-            color: var(--txt-md);
-            margin-top: 5px;
-        }
-
-        footer {
-            background-color: var(--panel);
-            text-align: center;
-            padding: 15px;
-            margin-top: auto;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.9rem;
-            color: var(--txt-md);
-            border-top: 1px solid var(--border);
-        }
-
-        #cpu-temp {
-            font-weight: bold;
-            color: var(--teal);
+            overflow-x: hidden;
         }
 
         /* ==========================================================================
-           CONTENEDOR SCADA Y TOPOGRAFÍA (PC / PANTALLAS GRANDES)
+           HEADER ESTILO COMANDO CENTRAL
            ========================================================================== */
-        .scada-container {
+        header {
+            background: linear-gradient(180deg, #111c24 0%, var(--bg-main) 100%);
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 2px solid #14232f;
+            position: relative;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--cyan-glow), transparent);
+        }
+
+        header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 3px;
+            color: var(--text-primary);
+            text-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+        }
+
+        header p {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--cyan-glow);
+            text-transform: uppercase;
+            margin-top: 6px;
+            letter-spacing: 2px;
+        }
+
+        /* ==========================================================================
+           CONTENEDOR DE RED / TOPOGRAFÍA ESCALONADA
+           ========================================================================== */
+        .scada-grid {
             display: flex;
             flex-direction: row;
-            justify-content: space-around;
-            align-items: flex-end; /* Simula la pendiente del terreno real */
-            gap: 25px;
-            padding: 50px 30px;
-            max-width: 1400px;
+            justify-content: center;
+            align-items: flex-end; /* Simulación física del terreno de montaña */
+            gap: 40px;
+            padding: 60px 20px;
+            max-width: 1300px;
             margin: 0 auto;
             width: 100%;
         }
 
-        .nodo-terreno {
-            background-color: var(--panel);
-            border-radius: 12px;
-            padding: 20px;
-            width: 330px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border: 1px solid var(--border);
+        .station-node {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 25px;
+            width: 350px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), inset 0 1px 2px rgba(255,255,255,0.05);
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .nodo-terreno h2 {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.3rem;
+        .station-node:hover {
+            border-color: #2c3f55;
+            transform: translateY(-5px);
+        }
+
+        /* Títulos Tecnológicos */
+        .station-node h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
             font-weight: 600;
-            margin-bottom: 15px;
-            color: var(--txt-hi);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid #1c2a38;
+            padding-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
         }
 
-        /* Escalonamiento topográfico de La Cumbrecita */
+        /* Alturas del terreno real en PC */
         .rio-bloque { order: 3; }
-        .pileta-bloque { order: 2; margin-bottom: 90px; }  /* Altura media */
-        .cisterna-bloque { order: 1; margin-bottom: 180px; } /* Altura máxima */
+        .pileta-bloque { order: 2; margin-bottom: 110px; }
+        .cisterna-bloque { order: 1; margin-bottom: 220px; }
 
         /* ==========================================================================
-           RECIPIENTES DE AGUA Y ANIMACIÓN DE ONDAS (WAVES)
+           INDICADORES DE NIVEL AVANZADOS (HMI STYLE)
            ========================================================================== */
-        .recipiente {
-            width: 170px;
-            height: 190px;
-            border: 4px solid var(--border2);
-            border-top: none;
-            border-radius: 0 0 16px 16px;
+        .hmi-level-container {
+            width: 100%;
+            background-color: #0b1118;
+            border: 1px solid #1a2635;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* Tanque estilizado vertical */
+        .gauge-bar-wrapper {
+            width: 35px;
+            height: 120px;
+            background-color: #06090d;
+            border: 2px solid #203144;
+            border-radius: 6px;
             position: relative;
             overflow: hidden;
-            background-color: rgba(0, 0, 0, 0.4);
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.8);
         }
 
-        .rio-recipiente {
-            border-radius: 24px;
-            border: 4px solid var(--border2);
-            height: 120px;
-            width: 210px;
-        }
-
-        .agua {
+        .gauge-fluid {
             position: absolute;
             bottom: 0;
+            left: 0;
             width: 100%;
-            background-color: var(--blue);
-            transition: height 0.8s ease, background-color 0.5s ease;
+            background: linear-gradient(0deg, #0055ff 0%, var(--cyan-glow) 100%);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+            transition: height 0.8s ease, background 0.5s ease;
         }
 
-        /* Generador de olas */
-        .wave {
+        /* Animación de ondas finas */
+        .gauge-fluid::after {
+            content: '';
             position: absolute;
-            top: -12px;
+            top: 0;
+            left: 0;
             width: 200%;
-            height: 24px;
-            background: radial-gradient(circle at 50% 100%, transparent 12px, var(--blue) 13px);
-            background-size: 24px 24px;
-            animation: oleajeContinuo 1.6s infinite linear;
+            height: 10px;
+            background: radial-gradient(circle at 50% 100%, transparent 6px, rgba(255,255,255,0.3) 7px);
+            background-size: 12px 10px;
+            animation: hmiWaves 1s infinite linear;
         }
 
-        @keyframes oleajeContinuo {
+        @keyframes hmiWaves {
             0% { transform: translateX(0); }
-            100% { transform: translateX(-24px); }
+            100% { transform: translateX(-12px); }
         }
 
-        /* ESTADO ALERTA ROJA: Cuando el interruptor de nivel pasa a 0 (Nivel Bajo) */
-        .recipiente.nivel-bajo .agua {
-            background-color: var(--red) !important;
-        }
-        .recipiente.nivel-bajo .wave {
-            background: radial-gradient(circle at 50% 100%, transparent 12px, var(--red) 13px) !important;
-            background-size: 24px 24px !important;
-        }
-
-        .indicador-nivel {
-            margin-top: 12px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.95rem;
-            color: var(--teal);
-        }
-        
-        .recipiente.nivel-bajo + .indicador-nivel {
-            color: var(--red);
-            font-weight: bold;
-            animation: parpadeoAlerta 1s infinite alternate;
-        }
-
-        @keyframes parpadeoAlerta {
-            0% { opacity: 0.4; }
-            100% { opacity: 1; }
-        }
-
-        /* ==========================================================================
-           TARJETAS DE BOMBAS Y LÓGICA DE COLORES DE ESTADO
-           ========================================================================== */
-        .bomba-card {
-            margin-top: 20px;
-            background-color: var(--panel2);
-            border-radius: 8px;
-            padding: 15px;
-            width: 100%;
-            border: 1px solid var(--border);
-        }
-
-        .bomba-motor {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: #fff;
-            float: left;
-            margin-right: 14px;
-            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-        }
-
-        .bomba-info {
+        .gauge-meta {
             display: flex;
             flex-direction: column;
+            flex-grow: 1;
         }
 
-        .bomba-titulo {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--txt-hi);
+        .gauge-label {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
         }
 
-        .bomba-estado {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.85rem;
+        .gauge-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
             margin-top: 2px;
         }
 
-        .bomba-modo {
-            font-size: 0.8rem;
-            font-style: italic;
-            color: var(--txt-md);
-            margin-top: 1px;
+        /* ALERTA DE NIVEL BAJO (0) */
+        .station-node.level-alarm .gauge-fluid {
+            background: linear-gradient(0deg, #b91c1c 0%, var(--red-glow) 100%) !important;
+            box-shadow: 0 0 15px rgba(255, 51, 68, 0.8) !important;
+        }
+        
+        .station-node.level-alarm .gauge-value {
+            color: var(--red-glow);
+            animation: textPulse 1s infinite alternate;
         }
 
-        /* Clases de estado dinámicas según tus especificaciones */
-        .bomba-marcha { background-color: var(--green); }          /* Verde */
-        .bomba-falla { background-color: var(--red); }             /* Rojo */
-        .bomba-deshabilitada { background-color: var(--yellow); }  /* Amarillo/Naranja */
-        .bomba-espera { background-color: var(--gray); }           /* Gris */
+        @keyframes textPulse {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
 
-        /* ==========================================================================
-           TELEMETRÍA ELÉCTRICA (SIEMPRE VISIBLE)
-           ========================================================================== */
-        .datos-electricos {
-            margin-top: 15px;
-            padding-top: 12px;
-            border-top: 1px dashed var(--border);
-            clear: both;
+        /* Modificación para la toma del Río */
+        .rio-recipiente-hmi {
+            height: 60px;
             width: 100%;
         }
 
-        .datos-electricos h4 {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 0.9rem;
+        /* ==========================================================================
+           CONTROLES Y TARJETAS DE BOMBAS (PILOTOS INDUSTRIALES)
+           ========================================================================== */
+        .pump-card {
+            background-color: #0b1118;
+            border: 1px solid #162230;
+            border-radius: 12px;
+            padding: 15px;
+            width: 100%;
+        }
+
+        .pump-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        /* Piloto LED indicador */
+        .status-pilot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background-color: var(--gray-glow);
+            box-shadow: 0 0 4px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+        }
+
+        .pump-title-group {
+            display: flex;
+            flex-direction: column;
+            margin-right: auto;
+            margin-left: 12px;
+        }
+
+        .pump-name {
+            font-size: 1rem;
             font-weight: 600;
-            color: var(--blue);
-            text-transform: uppercase;
-            margin-bottom: 6px;
             letter-spacing: 0.5px;
         }
 
-        .datos-electricos ul {
-            list-style: none;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.85rem;
+        .pump-mode {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
         }
 
-        .datos-electricos li {
-            padding: 3px 0;
+        /* Mapeo de estados en los Pilotos HMI */
+        .node-marcha .status-pilot { background-color: var(--green-glow); box-shadow: 0 0 12px var(--green-glow); }
+        .node-falla .status-pilot { background-color: var(--red-glow); box-shadow: 0 0 12px var(--red-glow); animation: textPulse 0.5s infinite alternate; }
+        .node-deshabilitada .status-pilot { background-color: var(--yellow-glow); box-shadow: 0 0 12px var(--yellow-glow); }
+        .node-espera .status-pilot { background-color: var(--gray-glow); box-shadow: 0 0 4px var(--gray-glow); }
+
+        .status-badge {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background-color: #141f2d;
+            color: var(--text-secondary);
+        }
+        
+        .node-marcha .status-badge { color: var(--green-glow); }
+        .node-falla .status-badge { color: var(--red-glow); }
+        .node-deshabilitada .status-badge { color: var(--yellow-glow); }
+
+        /* ==========================================================================
+           TELEMETRÍA DE RED ELÉCTRICA (TABLA DE DATOS CRÍTICOS)
+           ========================================================================== */
+        .telemetry-table {
+            width: 100%;
+            margin-top: 12px;
+            border-top: 1px solid #162230;
+            padding-top: 10px;
+        }
+
+        .telemetry-row {
             display: flex;
             justify-content: space-between;
-            color: var(--txt-md);
+            align-items: center;
+            padding: 4px 0;
         }
 
-        .datos-electricos span {
+        .telemetry-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .telemetry-value {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .telemetry-value span {
+            color: var(--cyan-glow);
             font-weight: bold;
-            color: var(--txt-hi);
-        }
-
-        .nota-sistema {
-            margin-top: 15px;
-            font-size: 0.8rem;
-            color: var(--txt-md);
-            text-align: center;
         }
 
         /* ==========================================================================
-           RESPONSIVO: DISPOSITIVOS MÓVILES (FORMATO VERTICAL COMPLETO)
+           RESPONSIVO: ADAPTACIÓN VERTICAL PARA SMARTPHONES
            ========================================================================== */
         @media (max-width: 768px) {
-            .scada-container {
-                flex-direction: column; /* Pasa todo el layout a una sola columna vertical */
+            .scada-grid {
+                flex-direction: column;
                 align-items: center;
-                padding: 20px 15px;
+                padding: 20px 10px;
                 gap: 25px;
             }
 
-            .nodo-terreno {
-                width: 100%; /* Toma el ancho completo de la pantalla del celular */
-                max-width: 380px;
-                margin-bottom: 0px !important; /* Quita los desniveles para que no queden huecos en blanco */
+            .station-node {
+                width: 100%;
+                max-width: 400px;
+                margin-bottom: 0px !important; /* Desactiva el escalonamiento físico en celular */
             }
 
-            /* Reordena la secuencia de arriba hacia abajo para formato vertical */
+            /* Mantiene la lectura secuencial de arriba hacia abajo en celulares */
             .cisterna-bloque { order: 1; }
             .pileta-bloque { order: 2; }
             .rio-bloque { order: 3; }
-
-            .datos-electricos {
-                display: block !important; /* Detalles de B1 y B2 siempre visibles en el Inicio */
-            }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>PANEL SCADA · SISTEMA DE BOMBEO</h1>
-        <p>Cooperativa de Agua - La Cumbrecita, Córdoba</p>
+        <h1>SISTEMA CENTRAL SCADA</h1>
+        <p>Monitoreo Hidráulico · Cooperativa La Cumbrecita</p>
     </header>
 
-    <main class="scada-container">
+    <main class="scada-grid">
 
-        <section class="nodo-terreno cisterna-bloque">
-            <h2>1. Cisterna (Tanque Elevado)</h2>
-            <div class="recipiente" id="tanque-cisterna">
-                <div class="agua" id="agua-cisterna" style="height: 70%;">
-                    <div class="wave"></div>
-                </div>
-            </div>
-            <div class="indicador-nivel" id="txt-nivel-cisterna">NIVEL: CORRECTO</div>
+        <section class="station-node cisterna-bloque node-espera">
+            <h2><span>01</span> CISTERNA ELEVADA</h2>
             
-            <div class="bomba-card">
-                <div class="bomba-motor bomba-espera" id="motor-b1">B1</div>
-                <div class="bomba-info">
-                    <span class="bomba-titulo">Bomba 1</span>
-                    <span class="bomba-estado" id="estado-b1" style="color: var(--gray);">Estado: EN ESPERA</span>
-                    <span class="bomba-modo" id="modo-b1">Modo: AUTOMÁTICO</span>
+            <div class="hmi-level-container">
+                <div class="gauge-bar-wrapper">
+                    <div class="gauge-fluid" style="height: 80%;"></div>
                 </div>
-                
-                <div class="datos-electricos">
-                    <h4>Telemetría Eléctrica:</h4>
-                    <ul>
-                        <li>Tensión L1: <span id="b1-v1">--</span> V</li>
-                        <li>Tensión L2: <span id="b1-v2">--</span> V</li>
-                        <li>Tensión L3: <span id="b1-v3">--</span> V</li>
-                        <li>Tiempo de Marcha: <span id="b1-horas">--</span> hs</li>
-                    </ul>
+                <div class="gauge-meta">
+                    <span class="gauge-label">ESTADO NIVEL</span>
+                    <span class="gauge-value" id="val-nivel-cisterna">OPTIMO</span>
+                </div>
+            </div>
+
+            <div class="pump-card">
+                <div class="pump-header">
+                    <div class="status-pilot"></div>
+                    <div class="pump-title-group">
+                        <span class="pump-name">BOMBA 01</span>
+                        <span class="pump-mode" id="b1-modo">MODO: AUTOMATICO</span>
+                    </div>
+                    <div class="status-badge" id="b1-badge">ESPERA</div>
+                </div>
+
+                <div class="telemetry-table">
+                    <div class="telemetry-row">
+                        <span class="telemetry-label">Tensión L1</span>
+                        <span class="telemetry-value"><span id="b1-v1">381</span> V</span>
+                    </div>
+                    <div class="telemetry-row">
+                        <span class="telemetry-label">Tensión L2</span>
+                        <span class="telemetry-value"><span id="b1-v2">379</span> V</span>
+                    </div>
+                    <div class="telemetry-row">
+                        <span class="telemetry-label">Tensión L3</span>
+                        <span class="telemetry-value"><span id="b1-v3">382</span> V</span>
+                    </div>
+                    <div class="telemetry-row" style="border-top: 1px dashed #162230; margin-top: 4px; padding-top: 4px;">
+                        <span class="telemetry-label">Horas Totales</span>
+                        <span class="telemetry-value" id="b1-horas" style="color: var(--text-primary);">124.5 h</span>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section class="nodo-terreno pileta-bloque">
-            <h2>2. Pileta de Decantación</h2>
-            <div class="recipiente" id="tanque-pileta">
-                <div class="agua" id="agua-pileta" style="height: 55%;">
-                    <div class="wave"></div>
+        <section class="station-node pileta-bloque node-marcha">
+            <h2><span>02</span> PILETA DE DECANTACIÓN</h2>
+            
+            <div class="hmi-level-container">
+                <div class="gauge-bar-wrapper">
+                    <div class="gauge-fluid" style="height: 65%;"></div>
+                </div>
+                <div class="gauge-meta">
+                    <span class="gauge-label">ESTADO NIVEL</span>
+                    <span class="gauge-value" id="val-nivel-pileta">NORMAL</span>
                 </div>
             </div>
-            <div class="indicador-nivel" id="txt-nivel-pileta">NIVEL: CORRECTO</div>
 
-            <div class="bomba-card">
-                <div class="bomba-motor bomba-marcha" id="motor-b2">B2</div>
-                <div class="bomba-info">
-                    <span class="bomba-titulo">Bomba 2</span>
-                    <span class="bomba-estado" id="estado-b2" style="color: var(--green);">Estado: MARCHA</span>
-                    <span class="bomba-modo" id="modo-b2">Modo: AUTOMÁTICO</span>
+            <div class="pump-card">
+                <div class="pump-header">
+                    <div class="status-pilot"></div>
+                    <div class="pump-title-group">
+                        <span class="pump-name">BOMBA 02</span>
+                        <span class="pump-mode" id="b2-modo">MODO: AUTOMATICO</span>
+                    </div>
+                    <div class="status-badge" id="b2-badge">MARCHA</div>
                 </div>
-                
-                <div class="datos-electricos">
-                    <h4>Telemetría Eléctrica:</h4>
-                    <ul>
-                        <li>Tensión L1: <span id="b2-v1">--</span> V</li>
-                        <li>Tensión L2: <span id="b2-v2">--</span> V</li>
-                        <li>Tensión L3: <span id="b2-v3">--</span> V</li>
-                        <li>Tiempo de Marcha: <span id="b2-horas">--</span> hs</li>
-                    </ul>
+
+                <div class="telemetry-table">
+                    <div class="telemetry-row">
+                        <span class="telemetry-label">Tensión L1</span>
+                        <span class="telemetry-value"><span id="b2-v1">380</span> V</span>
+                    </div>
+                    <div class="telemetry-row">
+                        <span class="telemetry-label">Tensión L2</span>
+                        <span class="telemetry-value"><span id="b2-v2">384</span> V</span>
+                    </div>
+                    <div class="telemetry-row">
+                        <span class="telemetry-label">Tensión L3</span>
+                        <span class="telemetry-value"><span id="b2-v3">381</span> V</span>
+                    </div>
+                    <div class="telemetry-row" style="border-top: 1px dashed #162230; margin-top: 4px; padding-top: 4px;">
+                        <span class="telemetry-label">Horas Totales</span>
+                        <span class="telemetry-value" id="b2-horas" style="color: var(--text-primary);">89.2 h</span>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section class="nodo-terreno rio-bloque">
-            <h2>3. Toma del Río</h2>
-            <div class="recipiente rio-recipiente" id="tanque-rio">
-                <div class="agua" id="agua-rio" style="height: 45%;">
-                    <div class="wave"></div>
+        <section class="station-node rio-bloque level-alarm">
+            <h2><span>03</span> TOMA DEL RÍO</h2>
+            
+            <div class="hmi-level-container">
+                <div class="gauge-bar-wrapper" style="height: 50px; width: 35px;">
+                    <div class="gauge-fluid" style="height: 15%;"></div>
+                </div>
+                <div class="gauge-meta">
+                    <span class="gauge-label">ALERTA CRÍTICA</span>
+                    <span class="gauge-value" id="val-nivel-rio">BAJO</span>
                 </div>
             </div>
-            <div class="indicador-nivel" id="txt-nivel-rio">NIVEL: CORRECTO</div>
-            <p class="nota-sistema">Captación inicial por gravedad.</p>
+            <p style="font-family: 'Roboto Mono', monospace; font-size: 0.75rem; color: var(--text-dark); text-align: center;">Estación base de captación natural.</p>
         </section>
 
     </main>
 
     <footer>
-        <p>Temperatura CPU Servidor: <span id="cpu-temp">--</span> °C | SCADA Sistema Activo</p>
+        <p>TELEMETRÍA HOST RPI · CPU TEMP: <span id="cpu-temp">32.6</span> °C · ESTADO DE RED: ONLINE</p>
     </footer>
 
 </body>
