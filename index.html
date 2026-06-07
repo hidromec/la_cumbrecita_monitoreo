@@ -152,35 +152,50 @@
         .ping-badge { position:absolute; top:12px; right:12px; font-family:'Roboto Mono',monospace; font-size:.55rem; color:var(--text-dim); letter-spacing:1px; }
 
         /* ═══════════════ TANK VISUAL ═══════════════ */
-        .tank-row { display:flex; gap:10px; align-items:flex-end; margin-bottom:12px; }
-        .tank-body {
-            width:24px; height:72px;
-            background:var(--bg-inner);
-            border:2px solid var(--border-mid);
-            border-radius:4px;
-            position:relative; overflow:hidden; flex-shrink:0;
-        }
-        .tank-fluid {
-            position:absolute; bottom:0; left:0; right:0;
-            background:linear-gradient(0deg,#0050a0,var(--cyan));
-            box-shadow:0 0 10px rgba(0,229,255,.5);
-            transition:height 1s ease;
-        }
-        .tank-fluid::after {
-            content:''; position:absolute; top:0; left:0;
-            width:200%; height:6px;
-            background:radial-gradient(circle at 50% 100%,transparent 3px,rgba(255,255,255,.2) 4px);
-            background-size:10px 6px;
-            animation:wave 1.2s linear infinite;
-        }
-        .tank-fluid.alarm { background:linear-gradient(0deg,#7b0000,var(--red)); box-shadow:0 0 10px rgba(255,23,68,.6); }
-        @keyframes wave { 0%{transform:translateX(0)} 100%{transform:translateX(-10px)} }
-        .tank-meta { flex:1; display:flex; flex-direction:column; gap:3px; }
+        .tank-wrap { width:100%; margin-bottom:10px; }
+        .tank-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; }
         .tank-label { font-family:'Roboto Mono',monospace; font-size:.58rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:1px; }
         .tank-val { font-family:'Orbitron',sans-serif; font-size:.95rem; font-weight:700; }
         .tank-val.ok    { color:var(--cyan); }
         .tank-val.alarm { color:var(--red); animation:pls .8s infinite alternate; }
         @keyframes pls { 0%{opacity:.5} 100%{opacity:1} }
+        /* Full-width tank body */
+        .tank-body {
+            width:100%; height:64px;
+            background:var(--bg-inner);
+            border:2px solid var(--border-mid);
+            border-radius:6px;
+            position:relative; overflow:hidden;
+        }
+        .tank-fluid {
+            position:absolute; bottom:0; left:0; right:0;
+            background:linear-gradient(0deg,#003a80 0%,#0070c0 60%,#00b8e0 100%);
+            box-shadow:0 0 12px rgba(0,229,255,.4);
+            transition:height 1s ease;
+        }
+        .tank-fluid.alarm {
+            background:linear-gradient(0deg,#5a0000,#b00020 60%,var(--red) 100%);
+            box-shadow:0 0 12px rgba(255,23,68,.5);
+        }
+        /* Still-water shimmer (pileta & cisterna) */
+        .tank-fluid.still::after {
+            content:''; position:absolute; top:0; left:0;
+            width:200%; height:5px;
+            background:radial-gradient(circle at 50% 100%,transparent 3px,rgba(255,255,255,.15) 4px);
+            background-size:10px 5px;
+            animation:shimmer 2s linear infinite;
+        }
+        @keyframes shimmer { 0%{transform:translateX(0)} 100%{transform:translateX(-10px)} }
+        /* River SVG waves overlay on the surface */
+        .tank-waves {
+            position:absolute; top:0; left:0; right:0;
+            height:14px; overflow:hidden; pointer-events:none;
+        }
+        .tank-waves svg { width:200%; height:100%; animation:waveScroll 1.4s linear infinite; }
+        @keyframes waveScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+        /* Invisible pipe anchor div - right edge, at water-surface Y */
+        .pipe-anchor { position:absolute; right:0; width:1px; height:1px; }
+        .tank-row { display:contents; }
 
         /* ═══════════════ PUMP CIRCLE ═══════════════ */
         .pump-circle-wrap {
@@ -199,7 +214,7 @@
         .pump-circle.espera        { border-color:var(--gray); }
         .pump-circle.deshabilitada { border-color:var(--yellow); box-shadow:0 0 8px rgba(255,171,0,.3); }
         .pump-impeller { width:16px; height:16px; }
-        006
+
         .pump-name-txt { font-size:.85rem; font-weight:700; line-height:1.1; }
         .pump-mode-txt { font-family:'Roboto Mono',monospace; font-size:.58rem; color:var(--text-secondary); }
         .pump-badge {
@@ -346,13 +361,23 @@
                     <div class="st-id">ESTACIÓN 01</div>
                     <div class="st-name">TOMA DEL RÍO</div>
 
-                    <div class="tank-row">
-                        <div class="tank-body">
-                            <div class="tank-fluid" id="fluid-rio" style="height:55%;"></div>
-                        </div>
-                        <div class="tank-meta">
+                    <div class="tank-wrap">
+                        <div class="tank-header">
                             <span class="tank-label">NIVEL RÍO</span>
                             <span class="tank-val ok" id="val-nivel-rio">ÓPTIMO</span>
+                        </div>
+                        <div class="tank-body" id="tank-rio">
+                            <div class="tank-fluid" id="fluid-rio" style="height:55%;">
+                                <!-- River animated waves on surface -->
+                                <div class="tank-waves">
+                                    <svg viewBox="0 0 200 14" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M0 7 C10 3,20 11,30 7 C40 3,50 11,60 7 C70 3,80 11,90 7 C100 3,110 11,120 7 C130 3,140 11,150 7 C160 3,170 11,180 7 C190 3,200 11,210 7" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+                                        <path d="M0 11 C8 8,18 14,28 11 C38 8,48 14,58 11 C68 8,78 14,88 11 C98 8,108 14,118 11 C128 8,138 14,148 11 C158 8,168 14,178 11 C188 8,198 14,208 11" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+                                    </svg>
+                                </div>
+                                <!-- anchor for pipe exit: at water surface -->
+                                <div class="pipe-anchor" id="anchor-rio"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -455,13 +480,15 @@
                     <div class="st-id">ESTACIÓN 02</div>
                     <div class="st-name">PILETA</div>
 
-                    <div class="tank-row">
-                        <div class="tank-body">
-                            <div class="tank-fluid" id="fluid-pileta" style="height:65%;"></div>
-                        </div>
-                        <div class="tank-meta">
+                    <div class="tank-wrap">
+                        <div class="tank-header">
                             <span class="tank-label">NIVEL PILETA</span>
                             <span class="tank-val ok" id="val-nivel-pileta">NORMAL</span>
+                        </div>
+                        <div class="tank-body" id="tank-pil">
+                            <div class="tank-fluid still" id="fluid-pileta" style="height:65%;">
+                                <div class="pipe-anchor" id="anchor-pil"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -548,13 +575,13 @@
                     <div class="st-id">ESTACIÓN 03</div>
                     <div class="st-name">CISTERNA ELEVADA</div>
 
-                    <div class="tank-row">
-                        <div class="tank-body" style="height:88px;">
-                            <div class="tank-fluid alarm" id="fluid-cisterna" style="height:12%;"></div>
-                        </div>
-                        <div class="tank-meta">
-                            <span class="tank-label">ALERTA CRÍTICA</span>
+                    <div class="tank-wrap">
+                        <div class="tank-header">
+                            <span class="tank-label">NIVEL CISTERNA</span>
                             <span class="tank-val alarm" id="val-nivel-cisterna">BAJO</span>
+                        </div>
+                        <div class="tank-body" id="tank-cis">
+                            <div class="tank-fluid alarm still" id="fluid-cisterna" style="height:12%;"></div>
                         </div>
                     </div>
 
@@ -834,11 +861,11 @@ async function fetchRPi(){
 }
 
 // ── Dynamic pipe drawing ───────────────────────
-// Reads real card positions from the DOM and draws
-// the SVG pipes to connect them precisely.
+// Reads the real position of the water-surface anchor inside each tank
+// and draws pipes that exit from that exact point on the right edge of
+// each card, travel horizontally, then turn 90° and enter the next card
+// from the top. Clean L-shaped path: horizontal → corner → vertical only.
 
-// Tracks the active state of each pipe so we can
-// redraw on resize without losing state.
 let _pipe1Active = false;
 let _pipe2Active = false;
 
@@ -847,105 +874,99 @@ function drawPipes() {
     const cardRio = document.querySelector('#col-rio .station-card');
     const cardPil = document.querySelector('#col-pileta .station-card');
     const cardCis = document.querySelector('#col-cisterna .station-card');
-    const overlay = document.getElementById('pipe-overlay');
+    const fluidRio = document.getElementById('fluid-rio');
+    const fluidPil = document.getElementById('fluid-pileta');
+    const overlay  = document.getElementById('pipe-overlay');
 
     if (!scene || !cardRio || !cardPil || !cardCis || !overlay) return;
 
-    const sRect  = scene.getBoundingClientRect();
-    const rRect  = cardRio.getBoundingClientRect();
-    const pRect  = cardPil.getBoundingClientRect();
-    const cRect  = cardCis.getBoundingClientRect();
+    const sRect = scene.getBoundingClientRect();
 
-    // Helper: card-relative coords (offset from scene top-left)
-    function rel(domRect) {
+    // Convert a page rect to scene-relative coords
+    function S(r) {
         return {
-            top:    domRect.top    - sRect.top,
-            left:   domRect.left   - sRect.left,
-            right:  domRect.right  - sRect.left,
-            bottom: domRect.bottom - sRect.top,
-            midX:   domRect.left   - sRect.left + domRect.width  / 2,
-            midY:   domRect.top    - sRect.top  + domRect.height / 2,
+            top:    r.top    - sRect.top,
+            left:   r.left   - sRect.left,
+            right:  r.right  - sRect.left,
+            bottom: r.bottom - sRect.top,
+            midX:   r.left   - sRect.left + r.width / 2,
+            w: r.width, h: r.height,
         };
     }
 
-    const R = rel(rRect);
-    const P = rel(pRect);
-    const C = rel(cRect);
+    const R = S(cardRio.getBoundingClientRect());
+    const P = S(cardPil.getBoundingClientRect());
+    const C = S(cardCis.getBoundingClientRect());
 
-    // Resize overlay to cover the full scene
-    overlay.setAttribute('width',  sRect.width);
-    overlay.setAttribute('height', sRect.height);
+    // Water surface Y = card.top + tank offset inside card + (1 - fill%) * tank_h
+    // Simpler: read the tank-body DOM element top + (100% - fluid_height%) * tank_body_h
+    function waterSurfaceY(cardEl, fluidEl) {
+        const tankBody = cardEl.querySelector('.tank-body');
+        if (!tankBody || !fluidEl) return S(cardEl.getBoundingClientRect()).top + 60;
+        const tbR = tankBody.getBoundingClientRect();
+        const tbTop = tbR.top - sRect.top;
+        const fillPct = parseFloat(fluidEl.style.height) / 100 || 0.5;
+        return tbTop + tbR.height * (1 - fillPct); // Y of water surface
+    }
 
-    // ── PIPE 1: sale del lado DERECHO de la card RÍO
-    //            a 1/3 desde arriba (por encima del texto ÓPTIMO)
-    //            sube, cruza y entra por el TOP de la card PILETA
-    const p1x0 = R.right;                  // borde derecho card RÍO
-    const p1y0 = R.top + R.bottom * 0.22;  // ~22% desde el top de la card → sobre el nivel/tank
-    const elbow1x = P.midX;               // alineado al centro de PILETA
-    const p1yTop  = Math.min(p1y0, P.top) - 18;  // sube por encima de ambas cards
-    const p1x1    = P.midX;               // entra al centro del top de PILETA
-    const p1y1    = P.top;
+    overlay.setAttribute('width',  sRect.width + 80);  // extra for right overflow
+    overlay.setAttribute('height', Math.max(sRect.height, 100));
 
+    const GAP = 18;  // clearance above cards for the horizontal run
+
+    // ── PIPE 1: RÍO right edge → horizontal → 90° corner → vertical down → PILETA top center
+    const p1x0 = R.right;
+    const p1y0 = waterSurfaceY(cardRio, fluidRio);      // water surface of RÍO tank
+    const p1x1 = P.midX;                                // X of PILETA center
+    const p1yH = Math.min(p1y0, P.top) - GAP;           // horizontal run height (above both cards)
+    const p1y1 = P.top;                                  // enters top of PILETA
+
+    // Path: exit right → run horizontal left-to-right → corner → drop into PILETA
+    // Note: PILETA is to the right so we go: right → turn up → go right → turn down
+    const r1 = 10; // corner radius
     const d1 = `M ${p1x0} ${p1y0}` +
-               ` L ${elbow1x - 20} ${p1y0}` +   // sale horizontal un tramo
-               ` Q ${elbow1x} ${p1y0} ${elbow1x} ${p1y0 - 20}` +  // codo suave
-               ` L ${elbow1x} ${p1yTop}` +        // sube
-               ` L ${p1x1} ${p1yTop}` +           // horizontal al centro PILETA
-               ` L ${p1x1} ${p1y1}`;              // baja al top de la card
+               ` H ${p1x1 - r1}` +                     // horizontal to near PILETA center
+               ` Q ${p1x1} ${p1y0} ${p1x1} ${p1y0 - r1}` +  // codo bottom-right
+               ` V ${p1yH + r1}` +                      // vertical up
+               ` Q ${p1x1} ${p1yH} ${p1x1} ${p1yH}` +  // top corner (straight, already at top)
+               ` V ${p1y1}`;                             // drop into PILETA
 
-    // ── PIPE 2: sale del lado DERECHO de la card PILETA
-    //            a 1/3 desde arriba
-    //            sube, cruza y entra por el TOP de la card CISTERNA
+    // ── PIPE 2: PILETA right edge → horizontal → 90° corner → vertical down → CISTERNA top center
     const p2x0 = P.right;
-    const p2y0 = P.top + (P.bottom - P.top) * 0.22;
-    const elbow2x = C.midX;
-    const p2yTop  = Math.min(p2y0, C.top) - 18;
-    const p2x1    = C.midX;
-    const p2y1    = C.top;
+    const p2y0 = waterSurfaceY(cardPil, fluidPil);      // water surface of PILETA tank
+    const p2x1 = C.midX;
+    const p2yH = Math.min(p2y0, C.top) - GAP;
+    const p2y1 = C.top;
 
     const d2 = `M ${p2x0} ${p2y0}` +
-               ` L ${elbow2x - 20} ${p2y0}` +
-               ` Q ${elbow2x} ${p2y0} ${elbow2x} ${p2y0 - 20}` +
-               ` L ${elbow2x} ${p2yTop}` +
-               ` L ${p2x1} ${p2yTop}` +
-               ` L ${p2x1} ${p2y1}`;
+               ` H ${p2x1 - r1}` +
+               ` Q ${p2x1} ${p2y0} ${p2x1} ${p2y0 - r1}` +
+               ` V ${p2yH + r1}` +
+               ` Q ${p2x1} ${p2yH} ${p2x1} ${p2yH}` +
+               ` V ${p2y1}`;
 
-    // Set paths
-    document.getElementById('pipe1-bg').setAttribute('d', d1);
-    document.getElementById('pipe2-bg').setAttribute('d', d2);
-    document.getElementById('pipe1').setAttribute('d', d1);
-    document.getElementById('pipe2').setAttribute('d', d2);
+    ['pipe1-bg','pipe1'].forEach(id => document.getElementById(id)?.setAttribute('d', d1));
+    ['pipe2-bg','pipe2'].forEach(id => document.getElementById(id)?.setAttribute('d', d2));
 
-    // Label pipe 1 (midpoint of top horizontal run)
+    // Label positions: above the horizontal run, between exit point and PILETA/CISTERNA center
     const lbl1 = document.getElementById('lbl1');
-    lbl1.setAttribute('x', (p1x0 + elbow1x) / 2 - 10);
-    lbl1.setAttribute('y', p1yTop - 4);
+    if (lbl1) { lbl1.setAttribute('x', (p1x0 + p1x1) / 2 - 50); lbl1.setAttribute('y', p1yH - 5); }
 
-    // Label pipe 2
     const lbl2 = document.getElementById('lbl2');
-    lbl2.setAttribute('x', (p2x0 + elbow2x) / 2 - 10);
-    lbl2.setAttribute('y', p2yTop - 4);
+    if (lbl2) { lbl2.setAttribute('x', (p2x0 + p2x1) / 2 - 50); lbl2.setAttribute('y', p2yH - 5); }
 
-    // Cota labels below each card
-    const cota1 = document.getElementById('cota1');
-    cota1.setAttribute('x', R.midX - 20);
-    cota1.setAttribute('y', R.bottom + 14);
+    // Cota labels
+    document.getElementById('cota1')?.setAttribute('x', R.midX - 18);
+    document.getElementById('cota1')?.setAttribute('y', R.bottom + 16);
+    document.getElementById('cota2')?.setAttribute('x', P.midX - 18);
+    document.getElementById('cota2')?.setAttribute('y', P.bottom + 16);
+    document.getElementById('cota3')?.setAttribute('x', C.midX - 18);
+    document.getElementById('cota3')?.setAttribute('y', C.bottom + 16);
 
-    const cota2 = document.getElementById('cota2');
-    cota2.setAttribute('x', P.midX - 20);
-    cota2.setAttribute('y', P.bottom + 14);
-
-    const cota3 = document.getElementById('cota3');
-    cota3.setAttribute('x', C.midX - 20);
-    cota3.setAttribute('y', C.bottom + 14);
-
-    // Re-apply active/inactive classes after redraw
     setPipe('pipe1', _pipe1Active);
     setPipe('pipe2', _pipe2Active);
 }
 
-// Override setPipe to also track state and update labels
-const _origSetPipe = setPipe;
 function setPipe(pipeId, active) {
     if (pipeId === 'pipe1') _pipe1Active = active;
     if (pipeId === 'pipe2') _pipe2Active = active;
@@ -953,20 +974,18 @@ function setPipe(pipeId, active) {
     const p = document.getElementById(pipeId); if (!p) return;
     p.className = 'pipe-flow ' + (active ? 'active' : 'inactive');
 
-    // Update label text and class
     const lblId = pipeId === 'pipe1' ? 'lbl1' : 'lbl2';
     const lbl = document.getElementById(lblId);
     if (lbl) {
         lbl.textContent = active ? 'CAÑO DE IMPULSIÓN →' : 'FLUJO DETENIDO · FALLA';
-        lbl.className   = active ? 'pipe-lbl-cyan'        : 'pipe-lbl-red';
+        lbl.className   = active ? 'pipe-lbl-cyan' : 'pipe-lbl-red';
     }
 }
 
-// Draw on load and on every resize
 window.addEventListener('resize', drawPipes);
-// Draw after fonts/layout settle
-window.addEventListener('load', () => { drawPipes(); setTimeout(drawPipes, 400); });
-setTimeout(drawPipes, 200);
+window.addEventListener('load', () => { drawPipes(); setTimeout(drawPipes, 300); setTimeout(drawPipes, 800); });
+setTimeout(drawPipes, 100);
+setTimeout(drawPipes, 500);
 
 // ── Poll ───────────────────────────────────────
 async function poll(){
