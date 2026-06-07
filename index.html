@@ -96,20 +96,15 @@
             width: 100%;
         }
 
-        /* ── PIPE ROW ── */
-        .pipe-row {
+        /* ── PIPE OVERLAY ── */
+        #pipe-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;       
-            z-index: 1;         
-            pointer-events: none; 
-        }
-        .pipe-row svg {
-            width: 100%;
             height: 100%;
-            display: block;
+            pointer-events: none;
+            z-index: 1;
             overflow: visible;
         }
 
@@ -260,9 +255,9 @@
             opacity:.75;
         }
         @keyframes flowAnim { 0%{stroke-dashoffset:0} 100%{stroke-dashoffset:-23} }
-        .pipe-lbl-cyan { font-family:'Roboto Mono',monospace; font-size:8px; fill:var(--cyan); opacity:.55; letter-spacing:.5px; }
-        .pipe-lbl-red  { font-family:'Roboto Mono',monospace; font-size:8px; fill:var(--red);  opacity:.65; letter-spacing:.5px; }
-        .cota-txt      { font-family:'Roboto Mono',monospace; font-size:8px; fill:var(--text-dim); }
+        .pipe-lbl-cyan { font-family:'Roboto Mono',monospace; font-size:10px; fill:var(--cyan); opacity:.6; letter-spacing:.5px; }
+        .pipe-lbl-red  { font-family:'Roboto Mono',monospace; font-size:10px; fill:var(--red);  opacity:.7; letter-spacing:.5px; }
+        .cota-txt      { font-family:'Roboto Mono',monospace; font-size:9px;  fill:var(--text-dim); }
 
         /* ═══════════════ LEGEND ═══════════════ */
         .legend-bar {
@@ -326,21 +321,22 @@
 
     <div class="scene-wrap">
 
-        <div class="pipe-row">
-            <svg viewBox="0 0 600 500" preserveAspectRatio="none" id="pipe-svg">
-                <path class="pipe-bg"   d="M 190 310 L 220 310 L 220 160 L 300 160 L 300 120"/>
-                <path class="pipe-flow active" id="pipe1" d="M 190 310 L 220 310 L 220 160 L 300 160 L 300 120"/>
-                <text class="pipe-lbl-cyan" x="226" y="152">CAÑO DE IMPULSIÓN →</text>
-
-                <path class="pipe-bg"   d="M 300 120 L 300 40 L 500 40 L 500 0"/>
-                <path class="pipe-flow inactive" id="pipe2" d="M 300 120 L 300 40 L 500 40 L 500 0"/>
-                <text class="pipe-lbl-red" x="310" y="32">FLUJO DETENIDO · FALLA</text>
-
-                <text class="cota-txt" x="10"  y="235">COTA 0 m</text>
-                <text class="cota-txt" x="210" y="115">COTA +12 m</text>
-                <text class="cota-txt" x="410" y="35">COTA +26 m</text>
-            </svg>
-        </div>
+        <!-- SVG overlay posicionado por JS según las cards reales -->
+        <svg id="pipe-overlay">
+            <!-- pipe BG outlines -->
+            <path id="pipe1-bg" class="pipe-bg"/>
+            <path id="pipe2-bg" class="pipe-bg"/>
+            <!-- animated flows -->
+            <path id="pipe1" class="pipe-flow inactive"/>
+            <path id="pipe2" class="pipe-flow inactive"/>
+            <!-- labels -->
+            <text id="lbl1" class="pipe-lbl-cyan"></text>
+            <text id="lbl2" class="pipe-lbl-cyan"></text>
+            <!-- cota labels -->
+            <text id="cota1" class="cota-txt">COTA 0 m</text>
+            <text id="cota2" class="cota-txt">COTA +12 m</text>
+            <text id="cota3" class="cota-txt">COTA +26 m</text>
+        </svg>
 
         <div class="cards-row">
 
@@ -837,8 +833,146 @@ async function fetchRPi(){
     } catch(err){ console.warn('RPi DI error:',err); }
 }
 
+// ── Dynamic pipe drawing ───────────────────────
+// Reads real card positions from the DOM and draws
+// the SVG pipes to connect them precisely.
+
+// Tracks the active state of each pipe so we can
+// redraw on resize without losing state.
+let _pipe1Active = false;
+let _pipe2Active = false;
+
+function drawPipes() {
+    const scene   = document.querySelector('.scene-wrap');
+    const cardRio = document.querySelector('#col-rio .station-card');
+    const cardPil = document.querySelector('#col-pileta .station-card');
+    const cardCis = document.querySelector('#col-cisterna .station-card');
+    const overlay = document.getElementById('pipe-overlay');
+
+    if (!scene || !cardRio || !cardPil || !cardCis || !overlay) return;
+
+    const sRect  = scene.getBoundingClientRect();
+    const rRect  = cardRio.getBoundingClientRect();
+    const pRect  = cardPil.getBoundingClientRect();
+    const cRect  = cardCis.getBoundingClientRect();
+
+    // Helper: card-relative coords (offset from scene top-left)
+    function rel(domRect) {
+        return {
+            top:    domRect.top    - sRect.top,
+            left:   domRect.left   - sRect.left,
+            right:  domRect.right  - sRect.left,
+            bottom: domRect.bottom - sRect.top,
+            midX:   domRect.left   - sRect.left + domRect.width  / 2,
+            midY:   domRect.top    - sRect.top  + domRect.height / 2,
+        };
+    }
+
+    const R = rel(rRect);
+    const P = rel(pRect);
+    const C = rel(cRect);
+
+    // Resize overlay to cover the full scene
+    overlay.setAttribute('width',  sRect.width);
+    overlay.setAttribute('height', sRect.height);
+
+    // ── PIPE 1: sale del lado DERECHO de la card RÍO
+    //            a 1/3 desde arriba (por encima del texto ÓPTIMO)
+    //            sube, cruza y entra por el TOP de la card PILETA
+    const p1x0 = R.right;                  // borde derecho card RÍO
+    const p1y0 = R.top + R.bottom * 0.22;  // ~22% desde el top de la card → sobre el nivel/tank
+    const elbow1x = P.midX;               // alineado al centro de PILETA
+    const p1yTop  = Math.min(p1y0, P.top) - 18;  // sube por encima de ambas cards
+    const p1x1    = P.midX;               // entra al centro del top de PILETA
+    const p1y1    = P.top;
+
+    const d1 = `M ${p1x0} ${p1y0}` +
+               ` L ${elbow1x - 20} ${p1y0}` +   // sale horizontal un tramo
+               ` Q ${elbow1x} ${p1y0} ${elbow1x} ${p1y0 - 20}` +  // codo suave
+               ` L ${elbow1x} ${p1yTop}` +        // sube
+               ` L ${p1x1} ${p1yTop}` +           // horizontal al centro PILETA
+               ` L ${p1x1} ${p1y1}`;              // baja al top de la card
+
+    // ── PIPE 2: sale del lado DERECHO de la card PILETA
+    //            a 1/3 desde arriba
+    //            sube, cruza y entra por el TOP de la card CISTERNA
+    const p2x0 = P.right;
+    const p2y0 = P.top + (P.bottom - P.top) * 0.22;
+    const elbow2x = C.midX;
+    const p2yTop  = Math.min(p2y0, C.top) - 18;
+    const p2x1    = C.midX;
+    const p2y1    = C.top;
+
+    const d2 = `M ${p2x0} ${p2y0}` +
+               ` L ${elbow2x - 20} ${p2y0}` +
+               ` Q ${elbow2x} ${p2y0} ${elbow2x} ${p2y0 - 20}` +
+               ` L ${elbow2x} ${p2yTop}` +
+               ` L ${p2x1} ${p2yTop}` +
+               ` L ${p2x1} ${p2y1}`;
+
+    // Set paths
+    document.getElementById('pipe1-bg').setAttribute('d', d1);
+    document.getElementById('pipe2-bg').setAttribute('d', d2);
+    document.getElementById('pipe1').setAttribute('d', d1);
+    document.getElementById('pipe2').setAttribute('d', d2);
+
+    // Label pipe 1 (midpoint of top horizontal run)
+    const lbl1 = document.getElementById('lbl1');
+    lbl1.setAttribute('x', (p1x0 + elbow1x) / 2 - 10);
+    lbl1.setAttribute('y', p1yTop - 4);
+
+    // Label pipe 2
+    const lbl2 = document.getElementById('lbl2');
+    lbl2.setAttribute('x', (p2x0 + elbow2x) / 2 - 10);
+    lbl2.setAttribute('y', p2yTop - 4);
+
+    // Cota labels below each card
+    const cota1 = document.getElementById('cota1');
+    cota1.setAttribute('x', R.midX - 20);
+    cota1.setAttribute('y', R.bottom + 14);
+
+    const cota2 = document.getElementById('cota2');
+    cota2.setAttribute('x', P.midX - 20);
+    cota2.setAttribute('y', P.bottom + 14);
+
+    const cota3 = document.getElementById('cota3');
+    cota3.setAttribute('x', C.midX - 20);
+    cota3.setAttribute('y', C.bottom + 14);
+
+    // Re-apply active/inactive classes after redraw
+    setPipe('pipe1', _pipe1Active);
+    setPipe('pipe2', _pipe2Active);
+}
+
+// Override setPipe to also track state and update labels
+const _origSetPipe = setPipe;
+function setPipe(pipeId, active) {
+    if (pipeId === 'pipe1') _pipe1Active = active;
+    if (pipeId === 'pipe2') _pipe2Active = active;
+
+    const p = document.getElementById(pipeId); if (!p) return;
+    p.className = 'pipe-flow ' + (active ? 'active' : 'inactive');
+
+    // Update label text and class
+    const lblId = pipeId === 'pipe1' ? 'lbl1' : 'lbl2';
+    const lbl = document.getElementById(lblId);
+    if (lbl) {
+        lbl.textContent = active ? 'CAÑO DE IMPULSIÓN →' : 'FLUJO DETENIDO · FALLA';
+        lbl.className   = active ? 'pipe-lbl-cyan'        : 'pipe-lbl-red';
+    }
+}
+
+// Draw on load and on every resize
+window.addEventListener('resize', drawPipes);
+// Draw after fonts/layout settle
+window.addEventListener('load', () => { drawPipes(); setTimeout(drawPipes, 400); });
+setTimeout(drawPipes, 200);
+
 // ── Poll ───────────────────────────────────────
-async function poll(){ await Promise.allSettled([fetchInflux(),fetchRPi()]); }
+async function poll(){
+    await Promise.allSettled([fetchInflux(),fetchRPi()]);
+    drawPipes();
+}
 poll(); setInterval(poll,POLL_MS);
 </script>
 </body>
