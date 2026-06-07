@@ -204,12 +204,7 @@
         .pump-circle.espera        { border-color:var(--gray); }
         .pump-circle.deshabilitada { border-color:var(--yellow); box-shadow:0 0 8px rgba(255,171,0,.3); }
         .pump-impeller { width:16px; height:16px; }
-        
-        /* Modificado: Solo gira si tiene explícitamente ambas clases de manera segura */
-        .pump-impeller.spin { animation:spin .9s linear infinite; }
-        @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
-        
-        .pump-info { flex:1; min-width:0; }
+        006
         .pump-name-txt { font-size:.85rem; font-weight:700; line-height:1.1; }
         .pump-mode-txt { font-family:'Roboto Mono',monospace; font-size:.58rem; color:var(--text-secondary); }
         .pump-badge {
@@ -397,7 +392,7 @@
                             <span class="srow-value" id="b1rio-s-falla"><span class="skel"></span></span>
                         </div>
                         <div class="srow">
-                            <span class="srow-label">Estado Arranque (P006)</span>
+                            <span class="srow-label">Estado Arranque Suave</span>
                             <span class="srow-value cyan" id="b1rio-s-p006"><span class="skel"></span></span>
                         </div>
                         <div class="srow">
@@ -415,7 +410,7 @@
                     </div>
 
                     <div class="status-section">
-                        <div class="ss-title">ALIMENTACIÓN (V)</div>
+                        <div class="ss-title">ALIMENTACIÓN ELÉCTRICA (V)</div>
                         <div class="srow">
                             <span class="srow-label">Voltaje L1</span>
                             <span class="srow-value cyan" id="b1rio-v1"><span class="skel"></span></span>
@@ -433,15 +428,15 @@
                     <div class="status-section">
                         <div class="ss-title">CONSUMO (A)</div>
                         <div class="srow">
-                            <span class="srow-label">Corriente L1 (P030)</span>
+                            <span class="srow-label">Corriente L1</span>
                             <span class="srow-value cyan" id="b1rio-i1"><span class="skel"></span></span>
                         </div>
                         <div class="srow">
-                            <span class="srow-label">Corriente L2 (P031)</span>
+                            <span class="srow-label">Corriente L2</span>
                             <span class="srow-value cyan" id="b1rio-i2"><span class="skel"></span></span>
                         </div>
                         <div class="srow">
-                            <span class="srow-label">Corriente L3 (P032)</span>
+                            <span class="srow-label">Corriente L3</span>
                             <span class="srow-value cyan" id="b1rio-i3"><span class="skel"></span></span>
                         </div>
                         <div class="srow" style="border-top:1px solid var(--border-dim);margin-top:3px;padding-top:3px;">
@@ -492,23 +487,23 @@
                     </div>
 
                     <div class="status-section">
-                        <div class="ss-title">ESTADO OPERATIVO · RPi DI</div>
+                        <div class="ss-title">ESTADO OPERATIVO</div>
                         <div class="srow">
-                            <span class="srow-label">Modo (DI_4)</span>
+                            <span class="srow-label">Modo</span>
                             <span class="srow-value" id="b2pil-s-modo"><span class="skel"></span></span>
                         </div>
                         <div class="srow">
-                            <span class="srow-label">Marcha (DI_5)</span>
+                            <span class="srow-label">Marcha</span>
                             <span class="srow-value" id="b2pil-s-marcha"><span class="skel"></span></span>
                         </div>
                         <div class="srow">
-                            <span class="srow-label">Falla (DI_6)</span>
+                            <span class="srow-label">Falla</span>
                             <span class="srow-value" id="b2pil-s-falla"><span class="skel"></span></span>
                         </div>
                     </div>
 
                     <div class="status-section">
-                        <div class="ss-title">ALIMENTACIÓN (V)</div>
+                        <div class="ss-title">ALIMENTACIÓN ELÉCTRICA (V)</div>
                         <div class="srow">
                             <span class="srow-label">Voltaje L1</span>
                             <span class="srow-value cyan" id="b2pil-v1"><span class="skel"></span></span>
