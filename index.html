@@ -87,24 +87,27 @@
             color:var(--red); margin-bottom:12px; letter-spacing:.5px;
         }
 
-        /* ═══════════════ SCENE LAYOUT ═══════════════
-           Two rows:
-           Row 1 (pipe-row): SVG cañerías con cotas
-           Row 2 (cards-row): las 3 station-cards
+/* ═══════════════ SCENE LAYOUT ═══════════════
+           Hacemos que el contenedor sea relativo para que el SVG
+           se posicione de forma absoluta detrás de las tarjetas.
         ═══════════════════════════════════════════ */
         .scene-wrap {
             display: flex;
             flex-direction: column;
-            gap: 0;
+            position: relative; /* Esencial para el posicionamiento del SVG */
             margin-bottom: 16px;
+            width: 100%;
         }
 
-        /* ── PIPE ROW ── */
+        /* ── PIPE ROW (MODIFICADO) ── */
         .pipe-row {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 120px;      /* espacio para las cañerías + cotas */
-            position: relative;
-            flex-shrink: 0;
+            height: 100%;       /* Ocupa todo el alto del contenedor scene-wrap */
+            z-index: 1;         /* Se queda atrás de las tarjetas */
+            pointer-events: none; /* Permite hacer clic a través del SVG si es necesario */
         }
         .pipe-row svg {
             width: 100%;
@@ -113,17 +116,18 @@
             overflow: visible;
         }
 
-        /* ── CARDS ROW ── */
+        /* ── CARDS ROW (MODIFICADO) ── */
         .cards-row {
             display: flex;
             flex-direction: row;
-            align-items: flex-start;   /* top-aligned; escalonado por margin-top */
+            align-items: flex-start; 
             gap: 0;
             width: 100%;
+            position: relative;
+            z-index: 2;         /* Pasa por encima del SVG de cañerías */
         }
 
-        /* Escalonado topográfico: RÍO al fondo (sin margen), PILETA sube, CISTERNA más arriba */
-        /* En pipe-row el SVG conecta los bordes superiores de las cards */
+        /* Escalonado topográfico: RÍO abajo, PILETA al medio, CISTERNA arriba */
         .st-col {
             display: flex;
             flex-direction: column;
@@ -131,9 +135,11 @@
             flex: 1;
             min-width: 0;
         }
-        #col-rio      { margin-top: 0px;   }
-        #col-pileta   { margin-top: 0px;   }   /* misma fila - altura la maneja el pipe-row */
-        #col-cisterna { margin-top: 0px;   }
+        
+        /* Ajustamos los márgenes superiores para lograr el efecto escalonado de la imagen_8453a3.jpg */
+        #col-rio      { margin-top: 240px; } /* Queda abajo de todo */
+        #col-pileta   { margin-top: 120px; } /* Altura intermedia */
+        #col-cisterna { margin-top: 0px;   } /* Arriba de todo (cerca del header, sin taparlo) */
 
         /* ═══════════════ STATION CARD ═══════════════ */
         .station-card {
@@ -337,40 +343,32 @@
              simulando que emergen del techo de las cards de abajo.
         ══════════════════════════════════════════════════════════════ -->
         <div class="pipe-row">
-            <svg viewBox="0 0 600 120" preserveAspectRatio="xMidYMid meet" id="pipe-svg">
-                <!--
-                  RÍO (col ~16.5% = x≈99)  →  PILETA (col ~50% = x≈300)
-                  PILETA (x≈300)            →  CISTERNA (col ~83.5% = x≈501)
-
-                  El caño sale del borde derecho de la card RÍO (x≈99+algo),
-                  sube, y baja a la PILETA. Mismo para PILETA→CISTERNA.
-
-                  Geometría: salida horizontal + codo + subida + entrada top
+            <svg viewBox="0 0 600 500" preserveAspectRatio="none" id="pipe-svg">
+                <!-- 
+                  Ajustamos el viewBox a 0..600 x 0..500 para cubrir el área escalonada.
+                  Centros de columna aproximados: RÍO≈100, PILETA≈300, CISTERNA≈500
                 -->
 
                 <!-- TRAMO 1: RÍO → PILETA -->
                 <!-- bg outline -->
-                <path class="pipe-bg"   d="M 155 110  L 200 110  L 200 20  L 400 20  L 400 110"/>
+                <path class="pipe-bg"   d="M 100 240 L 100 160 L 300 160 L 300 120"/>
                 <!-- flow animated -->
-                <path class="pipe-flow active" id="pipe1"
-                      d="M 155 110  L 200 110  L 200 20  L 400 20  L 400 110"/>
+                <path class="pipe-flow active" id="pipe1" d="M 100 240 L 100 160 L 300 160 L 300 120"/>
                 <!-- label -->
-                <text class="pipe-lbl-cyan" x="200" y="14">CAÑO DE IMPULSIÓN →</text>
-                <!-- descarga arrow -->
-                <line x1="400" y1="108" x2="400" y2="120" stroke="var(--cyan)" stroke-width="3" opacity=".5"/>
+                <text class="pipe-lbl-cyan" x="110" y="152">CAÑO DE IMPULSIÓN →</text>
 
                 <!-- TRAMO 2: PILETA → CISTERNA -->
-                <path class="pipe-bg"   d="M 445 110  L 490 110  L 490 20  L 570 20"/>
-                <path class="pipe-flow inactive" id="pipe2"
-                      d="M 445 110  L 490 110  L 490 20  L 570 20"/>
-                <text class="pipe-lbl-red" x="455" y="104">FLUJO DETENIDO · FALLA</text>
-                <!-- descarga detenida -->
-                <line x1="570" y1="18" x2="570" y2="30" stroke="var(--red)" stroke-width="3" opacity=".4"/>
+                <!-- bg outline -->
+                <path class="pipe-bg"   d="M 300 120 L 300 40 L 500 40 L 500 0"/>
+                <!-- flow animated -->
+                <path class="pipe-flow inactive" id="pipe2" d="M 300 120 L 300 40 L 500 40 L 500 0"/>
+                <!-- label -->
+                <text class="pipe-lbl-red" x="310" y="32">FLUJO DETENIDO · FALLA</text>
 
-                <!-- Cotas -->
-                <text class="cota-txt" x="10"  y="118">COTA 0 m</text>
-                <text class="cota-txt" x="260" y="118">COTA +12 m</text>
-                <text class="cota-txt" x="510" y="118">COTA +26 m</text>
+                <!-- Cotas reubicadas estratégicamente al lado de cada estación -->
+                <text class="cota-txt" x="10"  y="235">COTA 0 m</text>
+                <text class="cota-txt" x="210" y="115">COTA +12 m</text>
+                <text class="cota-txt" x="410" y="35">COTA +26 m</text>
             </svg>
         </div>
 
