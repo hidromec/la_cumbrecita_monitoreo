@@ -924,26 +924,22 @@ function drawPipes() {
     // Path: exit right → run horizontal left-to-right → corner → drop into PILETA
     // Note: PILETA is to the right so we go: right → turn up → go right → turn down
     const r1 = 10; // corner radius
+    // El caño termina en el tramo vertical — NO baja a la card destino
     const d1 = `M ${p1x0} ${p1y0}` +
-               ` H ${p1x1 - r1}` +                     // horizontal to near PILETA center
-               ` Q ${p1x1} ${p1y0} ${p1x1} ${p1y0 - r1}` +  // codo bottom-right
-               ` V ${p1yH + r1}` +                      // vertical up
-               ` Q ${p1x1} ${p1yH} ${p1x1} ${p1yH}` +  // top corner (straight, already at top)
-               ` V ${p1y1}`;                             // drop into PILETA
+               ` H ${p1x1 - r1}` +
+               ` Q ${p1x1} ${p1y0} ${p1x1} ${p1y0 - r1}` +
+               ` V ${p1yH}`;
 
-    // ── PIPE 2: PILETA right edge → horizontal → 90° corner → vertical down → CISTERNA top center
+    // ── PIPE 2
     const p2x0 = P.right;
-    const p2y0 = waterSurfaceY(cardPil, fluidPil);      // water surface of PILETA tank
+    const p2y0 = waterSurfaceY(cardPil, fluidPil);
     const p2x1 = C.midX;
     const p2yH = Math.min(p2y0, C.top) - GAP;
-    const p2y1 = C.top;
 
     const d2 = `M ${p2x0} ${p2y0}` +
                ` H ${p2x1 - r1}` +
                ` Q ${p2x1} ${p2y0} ${p2x1} ${p2y0 - r1}` +
-               ` V ${p2yH + r1}` +
-               ` Q ${p2x1} ${p2yH} ${p2x1} ${p2yH}` +
-               ` V ${p2y1}`;
+               ` V ${p2yH}`;
 
     ['pipe1-bg','pipe1'].forEach(id => document.getElementById(id)?.setAttribute('d', d1));
     ['pipe2-bg','pipe2'].forEach(id => document.getElementById(id)?.setAttribute('d', d2));
