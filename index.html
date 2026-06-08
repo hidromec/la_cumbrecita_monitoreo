@@ -919,7 +919,6 @@ function drawPipes() {
     const p1y0 = waterSurfaceY(cardRio, fluidRio);      // water surface of RÍO tank
     const p1x1 = P.midX;                                // X of PILETA center
     const p1yH = Math.min(p1y0, P.top) - GAP;           // horizontal run height (above both cards)
-    const p1y1 = P.top;                                  // enters top of PILETA
 
     // Path: exit right → run horizontal left-to-right → corner → drop into PILETA
     // Note: PILETA is to the right so we go: right → turn up → go right → turn down
