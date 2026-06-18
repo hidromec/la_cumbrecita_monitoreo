@@ -921,9 +921,9 @@ async function fetchInflux(){
         const fmtV=v=>v!==null?`${parseFloat(v).toFixed(0)} V`:'—';
 
         // Renderizado de Tensiones Bomba 1
-        set('b1rio-v1',   fmtV(b1v1));
-        set('b1rio-v2',   fmtV(b1v2));
-        set('b1rio-v3',   fmtV(b1v3));
+        set('b1rio-v1',   Number(b1v1).toFixed(0));
+        set('b1rio-v2',   Number(b1v2).toFixed(0));
+        set('b1rio-v3',   Number(b1v3).toFixed(0));
 
         set('b1rio-i1',   fmtA(b1i1));
         set('b1rio-i2',   fmtA(b1i2));
