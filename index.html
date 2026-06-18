@@ -811,7 +811,7 @@ async function fetchInflux(){
             b1v1,b1v2,b1v3, // Nuevas variables de tensión Bomba 1 (WEG ID 1)
             b2v1,b2v2,b2v3, // Nuevas variables de tensión Bomba 2 (Analizador ID 2)
             nivelPileta,
-            marchaB1Di,marchaB2Di
+            marchaB1Di,marchaB2Di,tempdisssw
         ] = await Promise.all([
             fluxLast('monitoreo_bombas','modo_auto'),
             fluxLast('monitoreo_bombas','marcha'),
@@ -843,7 +843,8 @@ async function fetchInflux(){
             fluxLast('monitoreo_bombas','B2_tension_l3'),
             fluxLast('monitoreo_bombas','nivel_pileta'),
             fluxLast('monitoreo_bombas','marcha_b1_di'),
-            fluxLast('monitoreo_bombas','marcha_b2_di')
+            fluxLast('monitoreo_bombas','marcha_b2_di'),
+            fluxLast('monitoreo_bombas','temperatura_disipador')
         ]);
 
         document.getElementById('influx-error').style.display='none';
@@ -922,7 +923,7 @@ async function fetchInflux(){
         set('b1rio-pct',  b1pct  !== null ? `${parseFloat(b1pct).toFixed(1)} %`  : '—');
         set('b1rio-vred', b1vred !== null ? `${parseFloat(b1vred).toFixed(0)} V` : '—');
         set('b1rio-hs',   b1hs   !== null ? `${parseFloat(b1hs).toFixed(1)} h`   : '—');
-        set('b1rio-s-temp',  b1temp !==null?`${parseFloat(b1temp).toFixed(1)} °C`:'—');
+        set('b1rio-s-temp',  tempdisssw !==null?`${parseFloat(tempdisssw).toFixed(1)} °C`:'—');
 
         // Pilot circle state for B1 (derived from P006)
         let st1 = 'espera';
