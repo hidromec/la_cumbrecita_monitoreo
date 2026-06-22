@@ -956,10 +956,10 @@ async function fetchInflux(){
         set('b2pil-v2',   fmtV(b2v2));
         set('b2pil-v3',   fmtV(b2v3));
 
-        set('b2pil-i1',   fmtA(b2i1));
-        set('b2pil-i2',   fmtA(b2i2));
-        set('b2pil-i3',   fmtA(b2i3));
-        set('b2pil-iavg', fmtA(b2iavg));
+        set('b2pil-i1',   fmtA(b2i1   !== null ? b2i1   / 100 : null));
+        set('b2pil-i2',   fmtA(b2i2   !== null ? b2i2   / 100 : null));
+        set('b2pil-i3',   fmtA(b2i3   !== null ? b2i3   / 100 : null));
+        set('b2pil-iavg', fmtA(b2iavg !== null ? b2iavg / 100 : null));
         set('b2pil-hs',   b2hs!==null?`${parseFloat(b2hs).toFixed(1)} h`:'—');
 
         // Nivel pileta
